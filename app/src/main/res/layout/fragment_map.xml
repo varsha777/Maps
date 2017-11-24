@@ -1,0 +1,109 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/locationMarker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="30dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- <TextView
+             android:id="@+id/locationMarkertext"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:background="@drawable/round_courner_map"
+             android:gravity="center"
+             android:minWidth="250dp"
+             android:paddingLeft="2dp"
+             android:paddingRight="2dp"
+             android:text=" Set your Location "
+             android:textColor="@android:color/white" />-->
+
+        <ImageView
+            android:id="@+id/imageMarker"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/user_marker" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/search_places"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/dialog_holo_light_frame"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="Click to Set Location"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/location_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_view"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="Pointer Location"
+            android:textColor="@android:color/black"
+            android:textSize="14dp" />
+
+    </RelativeLayout>
+
+
+</FrameLayout>
+
+
+    <!--
+       <RelativeLayout
+            android:id="@+id/search_places"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/dialog_holo_light_frame"
+            android:padding="15dp">
+
+            <TextView
+                android:id="@+id/text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:text="Set Location"
+                android:textColor="@android:color/holo_green_dark"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/location_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/text_view"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:text="Pointer Location"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+
+   -->

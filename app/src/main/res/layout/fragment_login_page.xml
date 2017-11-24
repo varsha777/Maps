@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    tools:context="com.example.varshadhoni.userapp.LoginRegisterOtp.LoginPage">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/border">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="105sp"
+            android:layout_height="105sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:src="@mipmap/logo" />
+
+        <com.alimuzaffar.lib.widgets.AnimatedEditText
+
+            android:id="@+id/user_phone_login"
+            android:layout_width="291dp"
+            android:layout_height="51dp"
+            android:layout_alignLeft="@+id/user_password_login"
+            android:layout_alignStart="@+id/user_password_login"
+            android:layout_below="@+id/logo"
+            android:layout_marginTop="45dp"
+            android:background="@drawable/login_edit_text_background"
+            android:drawableLeft="@mipmap/ic_login_phone"
+            android:hint="Enter Your Mobile Number"
+            android:inputType="phone"
+            android:maxLength="10"
+            app:animateCursor="false"
+            app:animationType="fromRight" />
+
+        <com.alimuzaffar.lib.widgets.AnimatedEditText
+            android:id="@+id/user_password_login"
+            android:layout_width="291dp"
+            android:layout_height="51dp"
+            android:layout_below="@+id/user_phone_login"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/login_edit_text_background"
+            android:drawableLeft="@mipmap/ic_password"
+            android:hint="Please Enter Password"
+            android:inputType="textPassword"
+            app:animateCursor="false"
+            app:animationType="fromMiddle" />
+
+        <Button
+            android:id="@+id/user_login_btn"
+            android:layout_width="291dp"
+            android:layout_height="51dp"
+            android:layout_alignLeft="@+id/user_forget_password"
+            android:layout_alignStart="@+id/user_forget_password"
+            android:layout_below="@+id/user_forget_password"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/curve_button"
+            android:text="Sign in" />
+
+        <TextView
+            android:id="@+id/new_user_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/user_password_login"
+            android:layout_alignRight="@+id/user_password_login"
+            android:layout_below="@+id/user_password_login"
+            android:layout_marginTop="22dp"
+            android:text="New User(Sign Up)"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/user_forget_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/new_user_register"
+            android:layout_alignBottom="@+id/new_user_register"
+            android:layout_alignLeft="@+id/user_password_login"
+            android:layout_alignStart="@+id/user_password_login"
+            android:text="Forget password?"
+            android:textColor="@android:color/white" />
+
+        <ProgressBar
+            android:id="@+id/driverSpinner"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+</RelativeLayout>
