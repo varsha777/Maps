@@ -42,3 +42,9 @@ storeFile=C:/Users/User/Androidstudio Projects/varshaInLobotus/Wizemen Forex/key
             {
                 cruncherEnabled = false
             }
+            
+//////////// app build problems to add this in proguard-rules.pro
+-ignorewarnings
+-keep class * {
+    public private *;
+}
