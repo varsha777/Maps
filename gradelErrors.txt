@@ -1,0 +1,44 @@
+//// Create a variable called keystorePropertiesFile, and initialize it to your
+//// keystore.properties file, in the rootProject folder.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+//
+//// Initialize a new Properties() object called keystoreProperties.
+def keystoreProperties = new Properties()
+//
+//// Load your keystore.properties file into the keystoreProperties object.
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+//////////////inside the android block in gradel
+    //    Signing configurations for build variants "release"
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+//////////////////// create file called keystore.properties in project folder  
+//////// for firebase OTP error release SHA1
+storePassword=EpressoWelcome123
+keyPassword=EpressoWelcome123
+keyAlias=key0
+storeFile=C:/Users/User/Androidstudio Projects/varshaInLobotus/Wizemen Forex/keystore/forex.jks
+
+
+
+
+////////////////problems with png images
+    aaptOptions
+            {
+                cruncherEnabled = false
+            }
