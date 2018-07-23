@@ -1,0 +1,60 @@
+RetrofitClient.java
+@Keep
+public class RetrofitClient {
+    private static Retrofit retrofit = null;
+
+    public static Retrofit getClient(String baseUrl) {
+        if (retrofit!=null) {
+       retrofit=null;
+        }
+        retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(
+                        new OkHttpClient.Builder()
+                                // this line is the important one:
+                                .cookieJar(new JavaNetCookieJar(new CookieManager()))
+                                .readTimeout(30, TimeUnit.SECONDS)
+                                .writeTimeout(30, TimeUnit.SECONDS)
+                                .build())
+                .build();
+
+        return retrofit;
+    }
+}
+
+ApiUtils.java
+@Keep
+public class ApiUtils {
+    private ApiUtils() {}
+    public static APIService getAPIService(String baseUrl) {
+        return RetrofitClient.getClient(baseUrl).create(APIService.class);
+    }
+}
+
+APIService.interface
+@Keep
+public interface APIService {
+
+    @POST(".")
+    @FormUrlEncoded
+    Call<ResponseBody> postReqToCheckUserIsPresentOrNot(@Field("Phone") String Phone);//
+}
+
+how to use?
+this or // private Call<ResponseBody> callCheckUserPresentOrNot;
+APIService apiService = ApiUtils.getAPIService(ConstantUtils.BASE_URL + ConstantUtils.POST_TO_CHECK_USER);
+        callCheckUserPresentOrNot = apiService.postReqToCheckUserIsPresentOrNot(((AppCompatEditText)
+                findViewById(R.id.activity_req_for_mobile_no_editext_id)).getText().toString());
+        callCheckUserPresentOrNot.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+               
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+               
+            }
+        });
