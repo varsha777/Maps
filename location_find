@@ -1,0 +1,334 @@
+ /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////    get loc stuff. . .  .
+    ////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////// google api client establishment to access address
+    ////
+    private GoogleApiClient googleApiClient = null;
+    private LocationRequest locationRequest = null;
+    private FusedLocationProviderClient mFusedLocationClient = null;
+    private AsyncTaskToGetTheAddress asyncTaskToGetTheAddress=null;
+    //
+    private LocationManager locationManager=null;
+    ///
+    private void connectToGoogleApiClientAndGetTheAddress() {
+        if (NetworkUtils.checkInternetAndOpenDialog(getActivity())) {
+            if (CommonFunc.isGooglePlayServicesAvailable(getActivity()))
+            {
+                if (dialogProgress == null)
+                {
+                    showProgressDialog();
+                    connectGoogleApiClient();
+                }
+            }
+        }
+    }
+
+    private void connectGoogleApiClient()
+    {
+
+        googleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        checkForLocationSettings();
+                    }
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Toast.makeText(getActivity(), "Google play service not responding... please refresh your mobile",
+                                Toast.LENGTH_LONG).show();
+                        googleApiClient=null;
+                        dismissProgressDialog();
+
+                    }
+                }).build();
+        googleApiClient.connect();
+
+
+    }
+    private void checkForLocationSettings()
+    {
+        ////////////////////////////////////////////////////////
+
+        locationRequest =new LocationRequest();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+
+        //**************************
+        builder.setAlwaysShow(true); //this is the key ingredient
+        //**************************
+
+        Task<LocationSettingsResponse> locationSettingsResponseTask =
+                LocationServices.getSettingsClient(getActivity()).checkLocationSettings(builder.build());
+        //
+        locationSettingsResponseTask.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                   reqForLocToCheckIn();
+
+                } catch (ApiException exception) {
+                    dismissProgressDialog();
+
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            try {
+                                // Cast to a resolvable exception.
+                                ResolvableApiException resolvable = (ResolvableApiException) exception;
+                                // Show the dialog by calling startResolutionForResult(),
+                                // and check the result in onActivityResult().
+                                resolvable.startResolutionForResult(
+                                        getActivity(),
+                                        ConstantUtils.REQUEST_CHECK_SETTINGS_HOME_FRAGMENT);
+                            } catch (IntentSender.SendIntentException | ClassCastException e) {
+                                // Ignore the error.
+                                CommonFunc.commonDialog(getActivity(),"GPS not working.. Please refresh your device",
+                                        getString(R.string.justErrorCode)+" 98",false);
+
+                            }
+
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            CommonFunc.commonDialog(getActivity(),"GPS not working.. Please refresh your device",
+                                    getString(R.string.justErrorCode)+" 87",false);
+                            break;
+                    }
+                }
+            }
+        });
+        //
+
+    }
+
+    private void reqForLocToCheckIn() {
+        getTheLocationFromLocationManager();
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private void getTheLocationFromLocationManager()
+    {
+        countDownTimer.start();
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+    }
+
+    // Define a listener that responds to location updates
+    LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            countDownTimer.cancel();
+            stopLocationManagerLisner();
+            decodeAddress(new LatLng(location.getLatitude(),
+                    location.getLongitude()));
+
+
+        }
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+        public void onProviderEnabled(String provider) {
+        }
+        public void onProviderDisabled(String provider) {
+
+        }
+    };
+
+    private CountDownTimer countDownTimer=new CountDownTimer(ConstantUtils.MIN_GPS_WAIT_TIME,1000) {
+        @Override
+        public void onTick(long millisUntilFinished) {
+
+        }
+
+        @SuppressLint("MissingPermission")
+        @Override
+        public void onFinish() {
+            stopLocationManagerLisner();
+            getLastLocationFromGoogleApiClient();
+        }
+    };
+
+
+
+
+
+    @SuppressWarnings("MissingPermission")
+    private void getLastLocationFromGoogleApiClient() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        mFusedLocationClient.requestLocationUpdates(locationRequest,locationCallback,null);
+
+    }
+    private LocationCallback locationCallback=new LocationCallback()
+    {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+
+            for (Location location : locationResult.getLocations()) {
+                decodeAddress(new LatLng(location.getLatitude(),
+                        location.getLongitude()));
+                StopGoogleLocationLisner();
+            }
+        }
+    };
+    private void decodeAddress(final LatLng latLng)
+    {
+        //https://maps.googleapis.com/maps/api/geocode/json?latlng=40.714224,-73.961452&key=YOUR_API_KEY
+        String req="https://maps.googleapis.com/maps/api/geocode/json?latlng="+
+                latLng.latitude+","+latLng.longitude+"&key="+getString(R.string.google_maps_key);
+
+
+        if (asyncTaskToGetTheAddress!=null)
+        {
+            if (asyncTaskToGetTheAddress.getStatus()!= AsyncTask.Status.RUNNING)
+            {
+                asyncTaskToGetTheAddress=new AsyncTaskToGetTheAddress();
+                asyncTaskToGetTheAddress.execute(req);
+            }
+        }else {
+            asyncTaskToGetTheAddress=new AsyncTaskToGetTheAddress();
+            asyncTaskToGetTheAddress.execute(req);
+        }
+    }
+
+    public void OnGpsRequestResponseForHomeFragment(int resultCode)
+    {
+        if (resultCode==RESULT_OK)
+        {
+            reqForLocToCheckIn();
+        }else if (resultCode==RESULT_CANCELED)
+        {
+            checkForLocationSettings();
+            Toast.makeText(getActivity(), "Please grant Gps access by clicking OK in the shown dialog", Toast.LENGTH_LONG).show();
+        }else {
+            reqForLocToCheckIn();
+            Toast.makeText(getActivity(), "Device gps is not responding.. Please refresh your device.. Error code 92", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private class  AsyncTaskToGetTheAddress extends AsyncTask<String, Void, String>
+    {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            return makeserverConnection(strings[0]);
+        }
+        @Override
+        protected void onPostExecute(String s) {
+            System.out.println("hhhhhhhhhhhhhh-------s----------"+s);
+            dismissProgressDialog();
+            if (s!=null)
+            {
+                try {
+                    JSONObject jsonObject=new JSONObject(s);
+                    JSONArray jsonArray=jsonObject.getJSONArray("results");
+                    if (jsonArray.length()>0)
+                    {
+                        String formatedAddress=jsonArray.getJSONObject(0).getString("formatted_address");
+                        if (formatedAddress!=null && !formatedAddress.isEmpty()) {
+                            if ( !PreferenceUtils.getIsUserCheckedIn(getActivity()))
+                            {
+                                basePresentor.performCheckIn(getActivity(),formatedAddress);
+                            }
+                            else {
+                                basePresentor.performCheckOut(getActivity(),formatedAddress);
+                            }
+                        }
+                        else {
+                            if ( !PreferenceUtils.getIsUserCheckedIn(getActivity()))
+                            {
+                                basePresentor.performCheckIn(getActivity(),formatedAddress);
+                            }
+                            else {
+                                basePresentor.performCheckOut(getActivity(),formatedAddress);
+                            }
+                        }
+
+                    }else {
+                        CommonFunc.commonDialog(getActivity(),"Alert!", "Unable to detect your location",false);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                CommonFunc.commonDialog(getActivity(),"Alert!", "Unable to detect your location",false);
+            }
+        }
+
+
+    }
+
+    public String makeserverConnection(String requestURL) {
+        URL url;
+        String response = "";
+        try {
+            url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            conn.setRequestProperty("Content-Type",
+                    "application/x-www-form-urlencoded");
+            conn.setDoOutput(true);
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                String line;
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line = br.readLine()) != null) {
+                    response += line;
+                }
+            } else {
+                response = "";
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
+    private void StopGoogleLocationLisner() {
+        if (mFusedLocationClient!=null)
+            mFusedLocationClient.removeLocationUpdates(locationCallback);
+
+        if (googleApiClient!=null)
+        {
+            if (googleApiClient.isConnected())
+                googleApiClient.disconnect();
+        }
+
+
+    }
+
+    private void stopLocationManagerLisner()
+    {
+        if (locationManager!=null)
+            locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (basePresentor!=null)
+            basePresentor.onStopMvpPresentor();
+        StopGoogleLocationLisner();
+        stopLocationManagerLisner();
+        if (asyncTaskToGetTheAddress!=null)
+        {
+            if (asyncTaskToGetTheAddress.getStatus()== AsyncTask.Status.RUNNING)
+                asyncTaskToGetTheAddress.cancel(true);
+        }
+        dismissProgressDialog();
+    }
